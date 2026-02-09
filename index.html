@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>All File to PDF Converter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{font-family:Arial;background:#f2f2f2;margin:0;padding:0}
+header{background:#007bff;color:#fff;padding:15px;text-align:center}
+.container{padding:20px}
+.box{max-width:450px;margin:auto;background:#fff;padding:20px;border-radius:10px;text-align:center}
+input,button{width:100%;margin:10px 0}
+button{padding:12px;background:#28a745;color:#fff;border:none;border-radius:6px;font-size:16px}
+section{background:#fff;margin:20px auto;max-width:450px;padding:20px;border-radius:10px}
+h3{margin-top:0}
+footer{text-align:center;font-size:13px;color:#666;padding:10px}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>All File to PDF Converter</h2>
+<p>Fast • Free • Secure</p>
+</header>
+
+<div class="container">
+<div class="box">
+<h3>Upload Files</h3>
+
+<input type="file" id="files" multiple>
+
+<button onclick="makePDF()">Convert to PDF</button>
+
+<p style="font-size:13px;color:#555">
+✔ Images & Text supported<br>
+❌ Video / Word browser mein direct convert nahi hote
+</p>
+</div>
+</div>
+
+<section id="about">
+<h3>About Us</h3>
+<p>
+This tool helps users convert images and text files into PDF format easily.
+No login required. No server upload. Everything works directly in your browser.
+</p>
+<p>
+Our goal is to provide a simple, fast and privacy-friendly file converter.
+</p>
+</section>
+
+<section id="privacy">
+<h3>Privacy Policy</h3>
+<p>
+Your privacy is very important to us.
+</p>
+<ul>
+<li>We do NOT upload your files to any server.</li>
+<li>All processing happens locally in your browser.</li>
+<li>We do NOT collect personal data.</li>
+<li>We do NOT store any files.</li>
+</ul>
+<p>
+By using this tool, you agree that files are processed only on your device.
+</p>
+</section>
+
+<footer>
+© 2026 All File to PDF Converter
+</footer>
+
+<script>
+async function makePDF(){
+ const { jsPDF } = window.jspdf;
+ const pdf = new jsPDF();
+ const files = document.getElementById("files").files;
+
+ if(files.length==0){
+   alert("Please select files");
+   return;
+ }
+
+ let added=false;
+
+ for(let file of files){
+   if(file.type.startsWith("image/")){
+     const imgData=await readFile(file);
+     const img=new Image();
+     img.src=imgData;
+     await new Promise(r=>img.onload=r);
+
+     const w=pdf.internal.pageSize.getWidth();
+     const h=img.height*w/img.width;
+     if(added) pdf.addPage();
+     pdf.addImage(img,"JPEG",0,0,w,h);
+     added=true;
+   }
+   else if(file.type==="text/plain"){
+     const text=await file.text();
+     if(added) pdf.addPage();
+     pdf.text(text,10,10);
+     added=true;
+   }
+   else{
+     alert(file.name+" is not supported in browser");
+   }
+ }
+
+ if(added) pdf.save("converted.pdf");
+}
+
+function readFile(file){
+ return new Promise(res=>{
+   const r=new FileReader();
+   r.onload=e=>res(e.target.result);
+   r.readAsDataURL(file);
+ });
+}
+</script>
+
+</body>
+</html>
